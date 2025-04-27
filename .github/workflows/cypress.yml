@@ -1,0 +1,13 @@
+name: cypress
+
+on:
+ push:
+    branches: [ "main" ]
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+        
