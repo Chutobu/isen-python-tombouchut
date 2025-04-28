@@ -1,12 +1,13 @@
 name: Configure Docker for Artifact Registry
 
 on:
-  workflow_run:
-    workflows: ["Docker"] 
-    types:
-      - completed
-    branches:
-      - main
+  workflow_dispatch: {}
+  # workflow_run:
+  #   workflows: ["Docker"] 
+  #   types:
+  #     - completed
+  #   branches:
+  #     - main
 
 jobs:
   configure-docker:

@@ -17,7 +17,7 @@ Brotli==1.1.0
 bs4==0.0.1
 byml==2.4.2
 cachetools==5.3.0
-cefpython3==66.0; sys_platform == "win32"
+cefpython3==66.1
 certifi==2022.6.15
 cffi==1.15.1
 charset-normalizer==2.0.12
@@ -65,7 +65,7 @@ pluggy==0.13.1
 proxy-tools==0.1.0
 psutil==7.0.0
 py==1.10.0
-py2exe==0.13.0.0; sys_platform == "win32"
+py2exe==0.13.0.0
 PyAutoGUI==0.9.53
 pycodestyle==2.7.0
 pycparser==2.21
@@ -89,8 +89,8 @@ pythonnet==2.5.2
 pytweening==1.0.7
 pytz==2021.1
 pywebview==3.6.3
-pywin32==310; sys_platform == "win32"
-pywin32-ctypes==0.2.0; sys_platform == "win32"
+pywin32==310
+pywin32-ctypes==0.2.0
 PyYAML==5.4.1
 pyzmq==26.4.0
 requests==2.27.1

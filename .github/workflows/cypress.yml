@@ -24,7 +24,6 @@ jobs:
 
       - name: Start Django server
         run: |
-          pip install --upgrade pip
           python manage.py runserver 0.0.0.0:8080 &
           sleep 10
 
