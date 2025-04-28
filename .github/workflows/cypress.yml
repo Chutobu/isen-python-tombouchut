@@ -1,13 +1,56 @@
-name: cypress
+name: E2E Tests (Cypress)
 
 on:
- push:
-    branches: [ "main" ]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  linter:
+  cypress_e2e:
+    name: Run Cypress E2E Tests
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
 
-        
+    container:
+      image: cypress/included:12.17.0
+
+    services:
+      web:
+        image: python:3.10
+        ports:
+          - 8000:8000
+        options: >-
+          --health-cmd "curl --silent http://localhost:8000/ || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
+        volumes:
+          - ./:/usr/src/app
+        working-directory: /usr/src/app
+        entrypoint:
+          - bash
+          - -lc
+          - |
+            pip install --upgrade pip setuptools wheel && \
+            pip install -r requirements.txt && \
+            python manage.py migrate --no-input && \
+            python manage.py runserver 0.0.0.0:8000
+
+    steps:
+      # checkout de votre code
+      - uses: actions/checkout@v3
+
+      # attendre que le service web soit opérationnel
+      - name: Wait for web to be up
+        run: |
+          for i in {1..30}; do
+            curl --silent http://localhost:8000/ && break
+            echo "Waiting for web... ($i)"
+            sleep 1
+          done
+
+      # lancer Cypress depuis le container cypress/included
+      - name: Run Cypress
+        run: |
+          # si besoin vous pouvez préciser d’autres options Cypress ici
+          cypress run --config baseUrl=http://localhost:8000
