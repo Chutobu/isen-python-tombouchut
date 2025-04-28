@@ -15,6 +15,11 @@ jobs:
         with:
           python-version: '3.8'
 
+      # ===> Patch de la version cefpython3
+      - name: Pin cefpython3 to a real version
+        run: |
+          sed -i 's/cefpython3==66.1/cefpython3==66.0/' requirements.txt
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -35,6 +40,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
+
+      - name: Pin cefpython3 to a real version
+        run: |
+          sed -i 's/cefpython3==66.1/cefpython3==66.0/' requirements.txt
 
       - name: Install dependencies
         run: |
