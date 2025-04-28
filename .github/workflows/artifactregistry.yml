@@ -5,7 +5,7 @@ substitutions:
     _REGION: europe-west1         # ← Remplacez par la région de votre repo
     _PROJECT_ID: mon-projet       # ← Remplacez par votre ID GCP
     _REPO: mon-repo               # ← Remplacez par le nom de votre repo
-  
+    
   steps:
     # 1) Authentification de Docker auprès de Artifact Registry
     - name: 'gcr.io/cloud-builders/gcloud'

@@ -1,67 +1,48 @@
-name: Configure Docker for Artifact Registry
-
+name: Google Cloud Deploy
+ 
 on:
-  workflow_dispatch: {}
-  # workflow_run:
-  #   workflows: ["Docker"] 
-  #   types:
-  #     - completed
-  #   branches:
-  #     - main
-
+  push:
+    branches:
+      - main
+ 
 jobs:
-  configure-docker:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} 
+  deploy:
     runs-on: ubuntu-latest
-
+ 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
+        uses: actions/checkout@v2
+ 
+      - name: Set up Google Cloud authentication
+        uses: 'google-github-actions/auth@v2'
         with:
-          credentials_json: '${{ secrets.SERVICE_ACCOUNT_KEY }}'
-
-      - name: Set up gcloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          install_components: 'docker-credential-gcr'
-
+           credentials_json: '${{ secrets.GOOGLEKEY }}'
+ 
       - name: Configure Docker to authenticate to Artifact Registry
         run: |
-          gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
-
-      - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ vars.DOCKERHUB_USERNAME }}" --password-stdin
-
-      - name: Pull image from Docker Hub
-        run: |
-          docker pull ${{ vars.DOCKERHUB_USERNAME }}/myapp:dev-${{ github.sha }}  
-
-      - name: Tag Docker image for Artifact Registry
-        run: |
-          docker tag ${{ vars.DOCKERHUB_USERNAME }}/myapp:dev-${{ github.sha }} ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/python-app:v${{ github.run_number }}
-
-  
+            gcloud auth configure-docker europe-west1-docker.pkg.dev --quiet
+ 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+ 
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+            context: .
+            push: false
+            load: true
+            tags: europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+            cache-from: type=registry,ref=europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+            cache-to: type=inline
+ 
       - name: Push Docker image to Artifact Registry
         run: |
-          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/python-app:v${{ github.run_number }}
-
-      
-      - name: Force gcloud config to correct region
-        run: |
-          gcloud config set run/region ${{ env.REGION }}
-  
+            docker push europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+ 
       - name: Deploy to Google Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
-          service: python-app
-          image: ${{ env.REGION }}-docker.pkg.dev/${{ env.GCP_PROJECT_ID }}/${{ env.ARTIFACT_REPOSITORY }}/python-app:v${{ github.run_number }}
-          region: ${{ env.REGION }}
-  
-          
-    env:
-      REGION: europe-west1
-      GCP_PROJECT_ID: isen-python-th    # <-- Ton vrai ID projet GCP
-      ARTIFACT_REPOSITORY: isen-python-repository      # Remplace "europe" par ton vrai région Artifact Registry (ex: us, europe, asia...)
+          service: isen-python-auto
+          image: europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+          region: europe-west1
+          project_id: vertical-hook-448709-t6
