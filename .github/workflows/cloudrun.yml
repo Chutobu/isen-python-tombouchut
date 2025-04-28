@@ -1,0 +1,42 @@
+name: Cloud Run Deploy
+
+on:
+  push:
+    branches:
+      - main               # ← Remplacez par votre branche de production
+  pull_request:
+    branches:
+      - main               # ← Facultatif, si vous voulez tester les PRs
+
+jobs:
+  deploy:
+    name: Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: my-service-account@my-project.iam.gserviceaccount.com
+
+      - id: deploy
+        name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          service: hello-cloud-run
+          image: gcr.io/cloudrun/hello
+          region: europe-west1           # ← Optionnel : spécifiez la région de votre service
+          project_id: cicd-458207         # ← Optionnel : si votre provider n'est pas sur le même projet
+
+      - name: Call the deployed service
+        run: |
+          echo "App URL: ${{ steps.deploy.outputs.url }}"
+          curl "${{ steps.deploy.outputs.url }}"

@@ -1,0 +1,39 @@
+# cloudbuild.yaml
+#
+# Substitutions pour injecter vos variables (région, projet, dépôt)
+substitutions:
+    _REGION: europe-west1         # ← Remplacez par la région de votre repo
+    _PROJECT_ID: mon-projet       # ← Remplacez par votre ID GCP
+    _REPO: mon-repo               # ← Remplacez par le nom de votre repo
+  
+  steps:
+    # 1) Authentification de Docker auprès de Artifact Registry
+    - name: 'gcr.io/cloud-builders/gcloud'
+      entrypoint: 'bash'
+      args:
+        - '-c'
+        - |
+          echo "→ Configuration de Docker pour ${_REGION}-docker.pkg.dev"
+          gcloud auth configure-docker ${_REGION}-docker.pkg.dev --quiet
+  
+    # 2) Exemple : build de l’image
+    - name: 'gcr.io/cloud-builders/docker'
+      args:
+        [
+          'build',
+          '-t', '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/mon-image:${SHORT_SHA}',
+          '.'
+        ]
+  
+    # 3) Push de l’image vers Artifact Registry
+    - name: 'gcr.io/cloud-builders/docker'
+      args:
+        [
+          'push',
+          '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/mon-image:${SHORT_SHA}'
+        ]
+  
+  # (Facultatif) déclencheurs, notifications, etc.
+  images:
+    - '${_REGION}-docker.pkg.dev/${_PROJECT_ID}/${_REPO}/mon-image:${SHORT_SHA}'
+  
