@@ -4,9 +4,7 @@ on: [push, pull_request]
 
 jobs:
   unit-tests:
-    name: Unit Tests
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -15,10 +13,9 @@ jobs:
         with:
           python-version: '3.8'
 
-      # ===> Patch de la version cefpython3
-      - name: Pin cefpython3 to a real version
+      - name: Remove py2exe on non-Windows
         run: |
-          sed -i 's/cefpython3==66.1/cefpython3==66.0/' requirements.txt
+          sed -i '/py2exe==0.13.0.0/d' requirements.txt
 
       - name: Install dependencies
         run: |
@@ -28,6 +25,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           pytest unit_tests
+
 
   integration-tests:
     name: Integration Tests
