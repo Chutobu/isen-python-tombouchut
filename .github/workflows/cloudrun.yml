@@ -16,7 +16,7 @@ jobs:
       - name: Set up Google Cloud authentication
         uses: 'google-github-actions/auth@v2'
         with:
-           credentials_json: '${{ secrets.GOOGLEKEY }}'
+           credentials_json: '${{ secrets.GCP_SA_KEY  }}'
  
       - name: Configure Docker to authenticate to Artifact Registry
         run: |
@@ -31,18 +31,18 @@ jobs:
             context: .
             push: false
             load: true
-            tags: europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
-            cache-from: type=registry,ref=europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+            tags: europe-west1-docker.pkg.dev/europe-west1-docker.pkg.dev/cicd-458207/repository/myimage:dev
+            cache-from: type=registry,ref=europe-west1-docker.pkg.dev/europe-west1-docker.pkg.dev/cicd-458207/repository/myimage:dev
             cache-to: type=inline
  
       - name: Push Docker image to Artifact Registry
         run: |
-            docker push europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+            docker push europe-west1-docker.pkg.dev/europe-west1-docker.pkg.dev/cicd-458207/repository/myimage:dev
  
       - name: Deploy to Google Cloud Run
         uses: google-github-actions/deploy-cloudrun@v2
         with:
           service: isen-python-auto
-          image: europe-west1-docker.pkg.dev/vertical-hook-448709-t6/isen-python-app/myimage:dev
+          image: europe-west1-docker.pkg.dev/europe-west1-docker.pkg.dev/cicd-458207/repository/myimage:dev
           region: europe-west1
           project_id: vertical-hook-448709-t6
